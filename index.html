@@ -242,19 +242,17 @@ const $practiceDifficulty = document.querySelector('.practice-difficulty input')
 const $practiceHint = document.querySelector('.practice-hint')
 const $practiceClear = document.querySelector('.practice-clear')
 
-let words
+let mask
 
 init()
 
 function init() {
-  console.log($initialText.innerText.length)
-  words = JSON.parse(localStorage.getItem('words'))
-          || getWords($initialText.innerText.trim())
+  $masterText.value = localStorage.getItem('words') || $initialText.innerText.trim()
 
-  $masterText.value = joinWords(words, 'word')
+  mask = getMask($masterText.value)
 
   $showMaster.addEventListener('click', showMaster)
-  $masterText.addEventListener('change', generateWords)
+  $masterText.addEventListener('change', generateMask)
   $showPractice.addEventListener('click', showPractice)
   $practiceText.addEventListener('input', highlightPracticeText)
   $practiceDifficulty.addEventListener('input', setPracticeText)
@@ -297,12 +295,24 @@ function clearPracticeText() {
 
 function highlightPracticeText() {
   const text = $masterText.value
-  const input = $practiceText.value
+  const input = $practiceText.value.split('')
 
+  let i = 0
   const correctText = []
   const incorrectText = []
-  for (let i = 0; i < input.length && i < text.length; i++) {
-    if (input[i].toLowerCase() === text[i].toLowerCase() && !incorrectText.length) {
+  for (; i < input.length && i < text.length; i++) {
+    const leadingWhiteSpace = text.slice(i).match(/^\s+/)
+
+    if (isWhiteSpace(input[i]) && leadingWhiteSpace) {
+      if (incorrectText.length) {
+        incorrectText.splice(incorrectText.length, 0, ...leadingWhiteSpace[0])
+      } else {
+        correctText.splice(correctText.length, 0, ...leadingWhiteSpace[0])
+      }
+
+      input.splice(i, 1, ...leadingWhiteSpace[0])
+      i += leadingWhiteSpace[0].length - 1
+    } else if (input[i].toLowerCase() === text[i].toLowerCase() && !incorrectText.length) {
       correctText.push(text[i])
     } else {
       incorrectText.push(input[i] === ' ' ? '_' : input[i])
@@ -319,7 +329,7 @@ function highlightPracticeText() {
 
   $remainder = document.createElement('span')
   $remainder.className = "practice-remainder"
-  $remainder.innerText = joinWords(words, 'mask').slice(input.length)
+  $remainder.innerText = mask.slice(i)
 
   $practicePreview.innerHTML = ""
   $practicePreview.appendChild($correct)
@@ -328,44 +338,41 @@ function highlightPracticeText() {
 }
 
 function setPracticeText() {
-  generateWords()
+  generateMask()
 
-  localStorage.setItem('words', JSON.stringify(words))
+  localStorage.setItem('words', $masterText.value)
 
   $practiceText.value = ""
   $practiceText.select()
 
-  highlightPracticeText(joinWords(words, 'mask'))
+  highlightPracticeText()
 }
 
-function generateWords() {
-  words = getWords($masterText.value)
+function generateMask() {
+  mask = getMask($masterText.value)
 }
 
-function getWords(text) {
-  console.log("asdf", text.length)
+function getMask(text) {
   const difficulty = parseInt($practiceDifficulty.value || 1)
 
-  return text.split(/\s+/g).map(word => {
-    const wordDifficulty = Math.random() * difficulty / 2
-    let mask
+  let wordDifficulty = null
+  let mask = ''
 
-    if (difficulty === 1) {
-      mask = word
-    } else if (difficulty === 10 || wordDifficulty > 0.6) {
-      mask = word.split('').map(() => '_').join('')
-    } else if (wordDifficulty > 0.4) {
-      mask = word.split('').slice(0, 1) + word.split('').slice(1).map(() => '_').join('')
+  for (let i = 0; i < text.length; i++) {
+    if (isWhiteSpace(text[i])) {
+      wordDifficulty = null
+      mask += text[i]
     } else {
-      mask = word
+      wordDifficulty = wordDifficulty || Math.random() * difficulty / 2
+      mask += wordDifficulty > 0.5 ? '_' : text[i]
     }
+  }
 
-    return {word, mask}
-  })
+  return mask
 }
 
-function joinWords(words, prop) {
-  return words.map(x => x[prop]).join(' ')
+function isWhiteSpace(s) {
+  return s.match(/^\s+$/)
 }
 
 setInterval(function () {
