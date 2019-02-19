@@ -338,6 +338,8 @@ function highlightPracticeText() {
 }
 
 function setPracticeText() {
+  $masterText.value = $masterText.value.replace(/ +/g, ' ').replace(/[\n ]{2,30}/g, '\n')
+
   generateMask()
 
   localStorage.setItem('masterText', $masterText.value)
