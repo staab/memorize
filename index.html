@@ -286,7 +286,7 @@ function showPractice() {
 function showHint() {
   const nextWords = $masterText.value.slice($practiceText.value.length).split(' ').slice(0, 2)
 
-  $practiceText.value += nextWords.join(' ')
+  $practiceText.value += nextWords.join(' ') + ' '
   $practiceText.dispatchEvent(new Event('input'));
 }
 
