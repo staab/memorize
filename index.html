@@ -93,9 +93,9 @@
   }
 
   .practice-difficulty {
-    position: absolute;
+    position: fixed;
     top: 58px;
-    right: -182px;
+    right: 30px;
     color: white;
     font-family: 'Roboto', sans-serif;
     font-size: 20px;
@@ -112,9 +112,9 @@
   }
 
   .practice-hint {
-    position: absolute;
+    position: fixed;
     top: 122px;
-    right: -75px;
+    right: 134px;
     color: #1E2126;
     font-family: 'Roboto', sans-serif;
     font-size: 32px;
@@ -135,9 +135,9 @@
   }
 
   .practice-clear {
-    position: absolute;
+    position: fixed;
     top: 174px;
-    right: -89px;
+    right: 119px;
     font-size: 20px;
     font-family: 'Roboto', sans-serif;
     font-weight: bold;
@@ -282,9 +282,11 @@ function showPractice() {
 }
 
 function showHint() {
+  $practiceText.value = document.querySelector('.practice-correct').innerText
+
   const nextWords = $masterText.value.slice($practiceText.value.length).split(' ').slice(0, 2)
 
-  $practiceText.value = $correctText.value + nextWords.join(' ') + ' '
+  $practiceText.value += nextWords.join(' ') + ' '
   $practiceText.dispatchEvent(new Event('input'));
 }
 
