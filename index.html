@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link href="https://fonts.googleapis.com/css?family=Nova+Mono|Roboto" rel="stylesheet">
+<style type="text/css">
+  html, body {
+    padding: 0;
+    margin: 0;
+    font-family: 'Nova Mono', monospace;
+  }
+
+  *  {
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: #1E2126;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .bg {
+    display: flex;
+    justify-content: center;
+  }
+
+  .bg-inner {
+    width: 600px;
+    height: 100vh;
+    background-color: white;
+    position: fixed;
+  }
+
+  /* Header */
+
+  .header {
+    position: relative;
+    z-index: 2;
+    width: 600px;
+    height: 40px;
+    display: flex;
+    margin: 0 auto;
+    justify-content: stretch;
+    cursor: pointer;
+  }
+
+  .header a {
+    display: inline-block;
+    color: white;
+    flex-grow: 1;
+    background-color: #479AFF;
+    padding: 8px;
+    text-align: center;
+    transition: background-color 200ms;
+    font-weight: bold;
+  }
+
+  .header a.active, .header a:hover {
+    background-color: #357ED7;
+  }
+
+  /* Content */
+
+  .container {
+    position: relative;
+    z-index: 1;
+    width: 600px;
+    margin: -40px auto 0;
+    padding: 58px 18px;
+    height: 100vh;
+  }
+
+  /* Master */
+
+  .master-text {
+    width: 100%;
+    height: 90vh;
+    border-radius: 5px;
+    background-color: #F4F8FF;
+    padding: 12px;
+    border: 0px;
+    font-size: 14px;
+
+  }
+
+  /* Practice */
+
+  .practice-text {
+    position: absolute;
+    margin-top: -9999px;
+  }
+
+  .practice-difficulty {
+    position: absolute;
+    top: 58px;
+    right: -182px;
+    color: white;
+    font-family: 'Roboto', sans-serif;
+    font-size: 20px;
+  }
+
+  .practice-difficulty input {
+    border: 0px;
+    font-size: 14px;
+    border-radius: 5px;
+    background-color: #F4F8FF;
+    zoom: 1.5;
+    padding: 8px 0 8px 8px;
+    width: 46px;
+  }
+
+  .practice-hint {
+    position: absolute;
+    top: 122px;
+    right: -75px;
+    color: #1E2126;
+    font-family: 'Roboto', sans-serif;
+    font-size: 32px;
+    line-height: 29px;
+    font-weight: bold;
+    padding: 12px;
+    background-color: #F4F8FF;
+    border-radius: 1000px;
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 200ms;
+  }
+
+  .practice-hint:hover {
+    background-color: white;
+  }
+
+  .practice-clear {
+    position: absolute;
+    top: 174px;
+    right: -89px;
+    font-size: 20px;
+    font-family: 'Roboto', sans-serif;
+    font-weight: bold;
+    padding: 12px;
+    color: #F4F8FF;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  .practice-correct {
+    color: #0EC156;
+  }
+
+  .practice-incorrect {
+    color: #CE0000;
+  }
+</style>
+</head>
+<body>
+<div class="bg"><div class="bg-inner"></div></div>
+<div class="header">
+  <a class="show-master">Set Text</a>
+  <a class="show-practice">Practice</a>
+</div>
+<div class="container">
+  <div class="master">
+    <textarea class="master-text"></textarea>
+  </div>
+  <div class="practice">
+    <textarea autofocus="autofocus" class="practice-text"></textarea>
+    <div class="practice-preview"></div>
+    <div class="practice-difficulty">
+      <input type="number" min="0" max="10" value="1">
+      <span>&nbsp;Difficulty</span>
+    </div>
+    <div class="practice-hint">?</div>
+    <div class="practice-clear">Reset</div>
+  </div>
+</div>
+<div class="initial-text hidden">
+Bless the Lord, O my soul,
+    and all that is within me,
+    bless his holy name!
+Bless the Lord, O my soul,
+    and forget not all his benefits,
+who forgives all your iniquity,
+    who heals all your diseases,
+who redeems your life from the pit,
+    who crowns you with steadfast love and mercy,
+who satisfies you with good
+    so that your youth is renewed like the eagle's.
+
+The Lord works righteousness
+    and justice for all who are oppressed.
+He made known his ways to Moses,
+    his acts to the people of Israel.
+The Lord is merciful and gracious,
+    slow to anger and abounding in steadfast love.
+He will not always chide,
+    nor will he keep his anger forever.
+He does not deal with us according to our sins,
+    nor repay us according to our iniquities.
+For as high as the heavens are above the earth,
+    so great is his steadfast love toward those who fear him;
+as far as the east is from the west,
+    so far does he remove our transgressions from us.
+As a father shows compassion to his children,
+    so the Lord shows compassion to those who fear him.
+For he knows our frame;
+    he remembers that we are dust.
+
+As for man, his days are like grass;
+    he flourishes like a flower of the field;
+for the wind passes over it, and it is gone,
+    and its place knows it no more.
+But the steadfast love of the Lord is from everlasting to everlasting on those who fear him,
+    and his righteousness to children's children,
+to those who keep his covenant
+    and remember to do his commandments.
+The Lord has established his throne in the heavens,
+    and his kingdom rules over all.
+
+Bless the Lord, O you his angels,
+    you mighty ones who do his word,
+    obeying the voice of his word!
+Bless the Lord, all his hosts,
+    his ministers, who do his will!
+Bless the Lord, all his works,
+    in all places of his dominion.
+Bless the Lord, O my soul!
+</div>
+<script type="text/javascript">
+const $initialText = document.querySelector('.initial-text')
+const $showMaster = document.querySelector('.show-master')
+const $showPractice = document.querySelector('.show-practice')
+const $master = document.querySelector('.master')
+const $masterText = document.querySelector('.master-text')
+const $practice = document.querySelector('.practice')
+const $practiceText = document.querySelector('.practice-text')
+const $practicePreview = document.querySelector('.practice-preview')
+const $practiceDifficulty = document.querySelector('.practice-difficulty input')
+const $practiceHint = document.querySelector('.practice-hint')
+const $practiceClear = document.querySelector('.practice-clear')
+
+let words
+
+init()
+
+function init() {
+  console.log($initialText.innerText.length)
+  words = JSON.parse(localStorage.getItem('words'))
+          || getWords($initialText.innerText.trim())
+
+  $masterText.value = joinWords(words, 'word')
+
+  $showMaster.addEventListener('click', showMaster)
+  $masterText.addEventListener('change', generateWords)
+  $showPractice.addEventListener('click', showPractice)
+  $practiceText.addEventListener('input', highlightPracticeText)
+  $practiceDifficulty.addEventListener('input', setPracticeText)
+  $practiceHint.addEventListener('click', showHint)
+  $practiceClear.addEventListener('click', clearPracticeText)
+
+  showPractice()
+}
+
+function showMaster() {
+  $showMaster.classList.add('active')
+  $master.classList.remove('hidden')
+
+  $showPractice.classList.remove('active')
+  $practice.classList.add('hidden')
+}
+
+function showPractice() {
+  $showMaster.classList.remove('active')
+  $master.classList.add('hidden')
+
+  $showPractice.classList.add('active')
+  $practice.classList.remove('hidden')
+
+  setPracticeText()
+  $practiceText.focus()
+}
+
+function showHint() {
+  const nextWords = $masterText.value.slice($practiceText.value.length).split(' ').slice(0, 2)
+
+  $practiceText.value += nextWords.join(' ')
+  $practiceText.dispatchEvent(new Event('input'));
+}
+
+function clearPracticeText() {
+  $practiceText.value = ''
+  $practiceText.dispatchEvent(new Event('input'));
+}
+
+function highlightPracticeText() {
+  const text = $masterText.value
+  const input = $practiceText.value
+
+  const correctText = []
+  const incorrectText = []
+  for (let i = 0; i < input.length && i < text.length; i++) {
+    if (input[i].toLowerCase() === text[i].toLowerCase() && !incorrectText.length) {
+      correctText.push(text[i])
+    } else {
+      incorrectText.push(input[i] === ' ' ? '_' : input[i])
+    }
+  }
+
+  $correct = document.createElement('span')
+  $correct.className = "practice-correct"
+  $correct.innerText = correctText.join('')
+
+  $incorrect = document.createElement('span')
+  $incorrect.className = "practice-incorrect"
+  $incorrect.innerText = incorrectText.join('')
+
+  $remainder = document.createElement('span')
+  $remainder.className = "practice-remainder"
+  $remainder.innerText = joinWords(words, 'mask').slice(input.length)
+
+  $practicePreview.innerHTML = ""
+  $practicePreview.appendChild($correct)
+  $practicePreview.appendChild($incorrect)
+  $practicePreview.appendChild($remainder)
+}
+
+function setPracticeText() {
+  generateWords()
+
+  localStorage.setItem('words', JSON.stringify(words))
+
+  $practiceText.value = ""
+  $practiceText.select()
+
+  highlightPracticeText(joinWords(words, 'mask'))
+}
+
+function generateWords() {
+  words = getWords($masterText.value)
+}
+
+function getWords(text) {
+  console.log("asdf", text.length)
+  const difficulty = parseInt($practiceDifficulty.value || 1)
+
+  return text.split(/\s+/g).map(word => {
+    const wordDifficulty = Math.random() * difficulty / 2
+    let mask
+
+    if (difficulty === 1) {
+      mask = word
+    } else if (difficulty === 10 || wordDifficulty > 0.6) {
+      mask = word.split('').map(() => '_').join('')
+    } else if (wordDifficulty > 0.4) {
+      mask = word.split('').slice(0, 1) + word.split('').slice(1).map(() => '_').join('')
+    } else {
+      mask = word
+    }
+
+    return {word, mask}
+  })
+}
+
+function joinWords(words, prop) {
+  return words.map(x => x[prop]).join(' ')
+}
+
+setInterval(function () {
+  if ($showPractice.classList.contains('active')) {
+    $practiceText.focus()
+  }
+}, 100)
+</script>
+</body>
+</html>
