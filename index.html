@@ -247,7 +247,7 @@ let mask
 init()
 
 function init() {
-  $masterText.value = localStorage.getItem('words') || $initialText.innerText.trim()
+  $masterText.value = localStorage.getItem('masterText') || $initialText.innerText.trim()
 
   mask = getMask($masterText.value)
 
@@ -340,7 +340,7 @@ function highlightPracticeText() {
 function setPracticeText() {
   generateMask()
 
-  localStorage.setItem('words', $masterText.value)
+  localStorage.setItem('masterText', $masterText.value)
 
   $practiceText.value = ""
   $practiceText.select()
