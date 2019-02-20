@@ -316,7 +316,9 @@ function showPractice() {
   $practice.classList.remove('hidden')
 
   setPracticeText()
-  $practiceText.focus()
+
+  $practiceText.value = ""
+  highlightPracticeText()
 }
 
 function setPreview(value) {
@@ -391,9 +393,6 @@ function setPracticeText() {
 
   localStorage.setItem('difficulty', $difficulty.value)
   localStorage.setItem('masterText', $masterText.value)
-
-  $practiceText.value = ""
-  $practiceText.focus()
 
   highlightPracticeText()
 
