@@ -154,6 +154,25 @@
   .practice-incorrect {
     color: #CE0000;
   }
+
+  .toast {
+    opacity: 1;
+    transition: opacity 200ms;
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    border-radius: 5px;
+    width: 360px;
+    z-index: 2;
+    background: #479AFF;
+    color: white;
+    padding: 16px;
+    box-shadow: 0px 4px 9px black;
+  }
+
+  .toast.invisible {
+    opacity: 0;
+  }
 </style>
 </head>
 <body>
@@ -170,13 +189,14 @@
     <textarea autofocus="autofocus" class="practice-text"></textarea>
     <div class="practice-preview"></div>
     <div class="practice-difficulty">
-      <input type="number" min="0" max="10" value="2">
+      <input type="number" min="1" max="5" value="2">
       <span>&nbsp;Difficulty</span>
     </div>
     <div class="practice-hint">?</div>
     <div class="practice-clear">Reset</div>
   </div>
 </div>
+<div class="toast invisible"></div>
 <div class="initial-text hidden">
 Bless the Lord, O my soul,
     and all that is within me,
@@ -229,6 +249,7 @@ Bless the Lord, all his works,
     in all places of his dominion.
 Bless the Lord, O my soul!
 </div>
+<script type="text/javascript" src="/fuse.js"></script>
 <script type="text/javascript">
 const $initialText = document.querySelector('.initial-text')
 const $showMaster = document.querySelector('.show-master')
@@ -238,15 +259,17 @@ const $masterText = document.querySelector('.master-text')
 const $practice = document.querySelector('.practice')
 const $practiceText = document.querySelector('.practice-text')
 const $practicePreview = document.querySelector('.practice-preview')
-const $practiceDifficulty = document.querySelector('.practice-difficulty input')
+const $difficulty = document.querySelector('.practice-difficulty input')
 const $practiceHint = document.querySelector('.practice-hint')
 const $practiceClear = document.querySelector('.practice-clear')
+const $toast = document.querySelector('.toast')
 
 let mask
 
 init()
 
 function init() {
+  $difficulty.value = localStorage.getItem('difficulty') || 2
   $masterText.value = localStorage.getItem('masterText') || $initialText.innerText.trim()
 
   mask = getMask($masterText.value)
@@ -255,11 +278,19 @@ function init() {
   $masterText.addEventListener('change', generateMask)
   $showPractice.addEventListener('click', showPractice)
   $practiceText.addEventListener('input', highlightPracticeText)
-  $practiceDifficulty.addEventListener('input', setPracticeText)
+  $difficulty.addEventListener('input', setPracticeText)
   $practiceHint.addEventListener('click', showHint)
-  $practiceClear.addEventListener('click', clearPracticeText)
+  $practiceClear.addEventListener('click', clearPreview)
 
   showPractice()
+
+  setTimeout(() =>
+    showToast(15000, `
+      Type or speak to practice memorizing the words on the screen.
+      Click "Set Text" to customize the memorization text.
+    `),
+    2000
+  )
 }
 
 function showMaster() {
@@ -281,18 +312,20 @@ function showPractice() {
   $practiceText.focus()
 }
 
-function showHint() {
-  $practiceText.value = document.querySelector('.practice-correct').innerText
-
-  const nextWords = $masterText.value.slice($practiceText.value.length).split(' ').slice(0, 2)
-
-  $practiceText.value += nextWords.join(' ') + ' '
+function setPreview(value) {
+  $practiceText.value = value
   $practiceText.dispatchEvent(new Event('input'));
 }
 
-function clearPracticeText() {
-  $practiceText.value = ''
-  $practiceText.dispatchEvent(new Event('input'));
+function clearPreview() {
+  setPreview('')
+}
+
+function showHint() {
+  const correct = document.querySelector('.practice-correct').innerText
+  const nextWords = $masterText.value.slice(correct.length).split(' ').slice(0, 2)
+
+  setPreview(correct + nextWords.join(' ') + ' ')
 }
 
 function highlightPracticeText() {
@@ -337,6 +370,11 @@ function highlightPracticeText() {
   $practicePreview.appendChild($correct)
   $practicePreview.appendChild($incorrect)
   $practicePreview.appendChild($remainder)
+
+  window.scrollTo({
+    top: $remainder.offsetTop - 180,
+    behavior: 'smooth',
+  })
 }
 
 function setPracticeText() {
@@ -344,12 +382,46 @@ function setPracticeText() {
 
   generateMask()
 
+  localStorage.setItem('difficulty', $difficulty.value)
   localStorage.setItem('masterText', $masterText.value)
 
   $practiceText.value = ""
-  $practiceText.select()
+  $practiceText.focus()
 
   highlightPracticeText()
+
+  const uniqueWords = [...new Set($masterText.value.toLowerCase().match(/\w+/g))]
+  const grammar = `#JSGF V1.0; grammar colors; public <color> = ${uniqueWords.join(' | ')} ;`
+  const recognition = new webkitSpeechRecognition()
+  const speechRecognitionList = new webkitSpeechGrammarList()
+
+  speechRecognitionList.addFromString(grammar, 1)
+  recognition.grammars = speechRecognitionList
+  recognition.continuous = true
+  recognition.interimResults = false
+  recognition.maxAlternatives = 1
+
+  recognition.start()
+
+  recognition.onresult = function(event) {
+    const {transcript} = [].slice.call(event.results, -1)[0][0]
+
+    showToast(6000, `We heard: "${transcript.trim()}"`)
+
+    transcript.split(' ').forEach(word => {
+      const currentLength = $practiceText.value.length
+      const nextText = $masterText.value.slice(currentLength, currentLength + 40)
+      const nextWords = nextText.match(/\w+/g)
+      const fuse = new Fuse(nextWords, {distance: 5, threshold: 0.8})
+      const [matchIdx] = fuse.search(word)
+      const matchedWord = nextWords[matchIdx]
+      const [match] = nextText.match(new RegExp(`^[^\\w]*${matchedWord}[^\\w]*`)) || []
+
+      if (match) {
+        setPreview($practiceText.value + match)
+      }
+    })
+  }
 }
 
 function generateMask() {
@@ -357,7 +429,7 @@ function generateMask() {
 }
 
 function getMask(text) {
-  const difficulty = parseInt($practiceDifficulty.value || 1)
+  const difficulty = parseInt($difficulty.value || 1)
 
   let wordDifficulty = null
   let mask = ''
@@ -366,9 +438,13 @@ function getMask(text) {
     if (isWhiteSpace(text[i])) {
       wordDifficulty = null
       mask += text[i]
+    } else if (difficulty === 1) {
+      mask += text[i]
+    } else if (difficulty === 5) {
+      mask += '_'
     } else {
-      wordDifficulty = wordDifficulty || Math.random() * difficulty / 2
-      mask += wordDifficulty > 0.5 ? '_' : text[i]
+      wordDifficulty = wordDifficulty || Math.random() * Math.pow(difficulty, 2)
+      mask += wordDifficulty > 3 ? '_' : text[i]
     }
   }
 
@@ -379,11 +455,19 @@ function isWhiteSpace(s) {
   return s.match(/^\s+$/)
 }
 
+function showToast(timeout, message) {
+  $toast.innerText = message.trim().replace(/\s+/g, ' ')
+  $toast.classList.remove('invisible')
+
+  setTimeout(() => $toast.classList.add('invisible'), timeout)
+}
+
 setInterval(function () {
   if ($showPractice.classList.contains('active')) {
     $practiceText.focus()
   }
 }, 100)
+
 </script>
 </body>
 </html>
