@@ -291,13 +291,15 @@ function init() {
 
   showPractice()
 
-  setTimeout(() =>
-    showToast(15000, `
-      Type or speak to practice memorizing the words on the screen.
-      Click "Set Text" to customize the memorization text.
-    `),
-    2000
-  )
+  if (window.webkitSpeechRecognition) {
+    setTimeout(() =>
+      showToast(15000, `
+        Type or speak to practice memorizing the words on the screen.
+        Click "Set Text" to customize the memorization text.
+      `),
+      2000
+    )
+  }
 }
 
 function showMaster() {
@@ -398,35 +400,38 @@ function setPracticeText() {
 
   const uniqueWords = [...new Set($masterText.value.toLowerCase().match(/\w+/g))]
   const grammar = `#JSGF V1.0; grammar colors; public <color> = ${uniqueWords.join(' | ')} ;`
-  const recognition = new webkitSpeechRecognition()
-  const speechRecognitionList = new webkitSpeechGrammarList()
 
-  speechRecognitionList.addFromString(grammar, 1)
-  recognition.grammars = speechRecognitionList
-  recognition.continuous = true
-  recognition.interimResults = false
-  recognition.maxAlternatives = 1
+  if (window.webkitSpeechRecognition) {
+    const recognition = new webkitSpeechRecognition()
+    const speechRecognitionList = new webkitSpeechGrammarList()
 
-  recognition.start()
+    speechRecognitionList.addFromString(grammar, 1)
+    recognition.grammars = speechRecognitionList
+    recognition.continuous = true
+    recognition.interimResults = false
+    recognition.maxAlternatives = 1
 
-  recognition.onresult = function(event) {
-    const {transcript} = [].slice.call(event.results, -1)[0][0]
+    recognition.start()
 
-    showToast(6000, `We heard: "${transcript.trim()}"`)
+    recognition.onresult = function(event) {
+      const {transcript} = [].slice.call(event.results, -1)[0][0]
 
-    transcript.split(' ').forEach(word => {
-      const currentLength = $practiceText.value.length
-      const nextText = $masterText.value.slice(currentLength, currentLength + 40)
-      const nextWords = nextText.match(/\w+/g)
-      const fuse = new Fuse(nextWords, {distance: 5, threshold: 0.8})
-      const [matchIdx] = fuse.search(word)
-      const matchedWord = nextWords[matchIdx]
-      const [match] = nextText.match(new RegExp(`^[^\\w]*${matchedWord}[^\\w]*`)) || []
+      showToast(6000, `We heard: "${transcript.trim()}"`)
 
-      if (match) {
-        setPreview($practiceText.value + match)
-      }
-    })
+      transcript.split(' ').forEach(word => {
+        const currentLength = $practiceText.value.length
+        const nextText = $masterText.value.slice(currentLength, currentLength + 40)
+        const nextWords = nextText.match(/\w+/g)
+        const fuse = new Fuse(nextWords, {distance: 5, threshold: 0.8})
+        const [matchIdx] = fuse.search(word)
+        const matchedWord = nextWords[matchIdx]
+        const [match] = nextText.match(new RegExp(`^[^\\w]*${matchedWord}[^\\w]*`)) || []
+
+        if (match) {
+          setPreview($practiceText.value + match)
+        }
+      })
+    }
   }
 }
 
@@ -469,7 +474,7 @@ function showToast(timeout, message) {
 }
 
 setInterval(function () {
-  if ($showPractice.classList.contains('active')) {
+  if ($showPractice.classList.contains('active') && document.activeElement === document.body) {
     $practiceText.focus()
   }
 }, 100)
